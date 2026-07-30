@@ -1,26 +1,152 @@
 @import "tailwindcss";
 
+/* ============================================================
+   National Select Urgent Care — design tokens
+   Ported from the Claude Design source (National Select).
+   ============================================================ */
+@theme {
+  /* Brand palette */
+  --color-mist: #f2f5fa; /* page background */
+  --color-ink: #1b2a4a; /* navy — primary text / dark sections */
+  --color-ink-soft: #3d4a63; /* long-form body text */
+  --color-muted: #4a5a78; /* secondary text */
+  --color-brand: #e8342b; /* primary action */
+  --color-brand-dark: #b4231c; /* link hover / accents on light */
+  --color-brand-press: #ce291f; /* button pressed */
+  --color-coral: #ff8078; /* eyebrow on navy */
+  --color-line: #d9e1ec; /* hairline borders */
+  --color-line-soft: #e9eef6; /* softer row dividers */
+  --color-panel: #e4ebf4; /* tinted section background */
+  --color-panel-2: #e3eaf6; /* callout panels */
+  --color-pink: #fceeed; /* red-tinted surfaces */
+  --color-pink-line: #f6d5d3;
+  --color-pink-ink: #7a2a25; /* text on pink */
+  --color-cloud: #edf2f8; /* light text on navy */
+  --color-cloud-soft: #d8dde7;
+  --color-slate-chip: #dde6f4;
+  --color-navy-label: #8e9ab3; /* footer labels */
+  --color-field: #c7d1e0; /* input borders */
+  --color-open: #3ba55c;
+  --color-closed: #c2603f;
+
+  /* Fonts (wired to next/font CSS variables) */
+  --font-display: var(--font-bricolage), sans-serif;
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--color-mist);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Keep resets in @layer base so Tailwind utilities (e.g. bg-brand) can win.
+   Unlayered button { background: none } was wiping the red Check in CTAs. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  ul,
+  ol,
+  figure,
+  blockquote {
+    margin: 0;
+  }
+  ul,
+  ol {
+    padding: 0;
+    list-style: none;
+  }
+  button {
+    font: inherit;
+    color: inherit;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+  a {
+    color: var(--color-brand);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-brand-dark);
+    text-decoration: underline;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+/* Reveal-on-scroll (mirrors the source's IntersectionObserver reveal) */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+[data-reveal].in {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes nsuc-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes nsuc-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes nsuc-rise-center {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 12px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
