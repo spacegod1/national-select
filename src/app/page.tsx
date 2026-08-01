@@ -25,7 +25,7 @@ export default function HomePage() {
         <div>
           <div className="mb-[22px] inline-flex items-center gap-[9px] rounded-full border border-pink-line bg-pink py-[7px] pl-2.5 pr-3.5 text-[13.5px] font-semibold text-[#b4231c]">
             <PlusMark cross="#E8342B" check="#FCEEED" className="h-[15px] w-[15px]" />
-            Your neighborhood walk-in clinic
+            Your local walk-in clinic
           </div>
           <h1 className="mb-5 font-display text-[clamp(40px,6.2vw,68px)] font-extrabold leading-[1.03] tracking-[-.03em] text-balance">
             Feel better sooner.
@@ -75,7 +75,7 @@ export default function HomePage() {
       <Container as="section" className="py-[clamp(56px,8vw,104px)]">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-[clamp(30px,5vw,70px)]">
           <div data-reveal>
-            <Eyebrow>Why neighbors choose us</Eyebrow>
+            <Eyebrow>Why patients choose us</Eyebrow>
             <h2 className="mb-[18px] font-display text-[clamp(30px,4vw,46px)] font-extrabold leading-[1.06] tracking-[-.028em] text-balance">
               Real care, without the runaround.
             </h2>
@@ -142,7 +142,7 @@ export default function HomePage() {
       {/* TESTIMONIALS */}
       <Container as="section" className="py-[clamp(56px,8vw,100px)]">
         <div data-reveal className="mb-[38px] text-center">
-          <Eyebrow>From our neighbors</Eyebrow>
+          <Eyebrow>From our patients</Eyebrow>
           <h2 className="font-display text-[clamp(30px,4vw,46px)] font-extrabold leading-[1.06] tracking-[-.028em] text-balance">
             What people say after their visit
           </h2>

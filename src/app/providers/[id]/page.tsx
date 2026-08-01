@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { CheckInButton } from "@/components/booking-modal";
+import { ProviderBookingActions } from "@/components/provider-booking";
+import { ProviderPhoto } from "@/components/provider-photo";
 import { PROVIDERS, getProvider } from "@/lib/site-data";
 
 export function generateStaticParams() {
@@ -43,12 +44,13 @@ export default async function ProviderDetailPage({
             <span>{prv.name}</span>
           </div>
           <div className="flex flex-wrap items-center gap-[26px]">
-            <span
-              className="grid h-[110px] w-[110px] flex-none place-items-center rounded-[26px] font-display text-[38px] font-extrabold tracking-[-.02em]"
-              style={{ background: prv.tint, color: prv.ink }}
-            >
-              {prv.initials}
-            </span>
+            <ProviderPhoto
+              name={prv.name}
+              initials={prv.initials}
+              photo={prv.photo}
+              ink={prv.ink}
+              size="hero"
+            />
             <div>
               <h1 className="mb-2 font-display text-[clamp(32px,4.6vw,50px)] font-extrabold leading-[1.05] tracking-[-.03em]">
                 {prv.name}
@@ -102,7 +104,7 @@ export default async function ProviderDetailPage({
               </div>
               <div className="text-[15.5px] text-ink">{prv.languages}</div>
             </div>
-            <CheckInButton className="rounded-[12px] bg-[#e8342b] p-[15px] text-[16px] font-semibold text-white transition-colors hover:bg-[#ce291f]" />
+            <ProviderBookingActions provider={prv} />
           </div>
         </aside>
       </section>

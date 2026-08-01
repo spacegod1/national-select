@@ -26,7 +26,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "National Select Urgent Care — Silver Spring, MD",
   description:
-    "Your neighborhood walk-in clinic. Independent urgent care and primary care in Silver Spring, Maryland. Walk in any time we're open, or check in online.",
+    "Your local walk-in clinic. Independent urgent care and primary care in Silver Spring, Maryland. Walk in any time we're open, or check in online.",
 };
 
 export default function RootLayout({

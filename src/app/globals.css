@@ -128,14 +128,17 @@ body {
     translate: 0 0;
   }
 }
+/* Centering comes from the dialog's Tailwind -translate-x/y-1/2 classes (CSS
+   `translate` property). The keyframe must only add the rise — including the
+   -50% offsets here would stack with `translate` and push the modal off-center. */
 @keyframes nsuc-rise-center {
   from {
     opacity: 0;
-    transform: translate(-50%, calc(-50% + 12px));
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translateY(0);
   }
 }
 
