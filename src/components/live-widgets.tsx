@@ -34,7 +34,7 @@ export function HeroCinematicStatus() {
   const s = getStatus(now);
   const wait = 12 + (now.getDate() % 9);
   return (
-    <p className="home-hero-fade-up home-hero-delay-4 mt-7 text-[14px] text-white/75">
+    <p className="home-hero-fade-up home-hero-delay-3 mt-7 text-[14px] text-white/75">
       <span className="inline-flex text-white">
         <StatusInline status={s} />
       </span>
