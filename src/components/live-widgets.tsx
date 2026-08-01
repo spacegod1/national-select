@@ -28,6 +28,22 @@ export function StatusInline({ status }: { status?: ClinicStatus }) {
   );
 }
 
+/** Compact open + wait line for the cinematic homepage hero (on dark). */
+export function HeroCinematicStatus() {
+  const now = useLive();
+  const s = getStatus(now);
+  const wait = 12 + (now.getDate() % 9);
+  return (
+    <p className="home-hero-fade-up home-hero-delay-4 mt-7 text-[14px] text-white/75">
+      <span className="inline-flex text-white">
+        <StatusInline status={s} />
+      </span>
+      <span className="mx-2 text-white/35">·</span>
+      Typical wait <strong className="text-white" suppressHydrationWarning>{wait} min</strong>
+    </p>
+  );
+}
+
 /** Hero status strip: open state · typical wait · no appointment needed. */
 export function HeroStatusStrip() {
   const now = useLive();

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 56" role="img" aria-label="Maryland Medicaid">
+  <rect x="2" y="10" width="36" height="36" rx="8" fill="#E31837"/>
+  <text x="11" y="35" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="800" fill="#fff">MD</text>
+  <text x="48" y="28" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#1B2A4A">Maryland</text>
+  <text x="48" y="46" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#4A5A78">Medicaid</text>
+</svg>
