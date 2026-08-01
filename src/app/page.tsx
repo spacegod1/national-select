@@ -50,17 +50,14 @@ export default function HomePage() {
         <div className="absolute inset-0 z-[2] bg-gradient-to-r from-ink/90 via-ink/55 to-ink/20" />
         <div className="absolute inset-0 z-[2] bg-gradient-to-t from-ink/70 via-transparent to-ink/30" />
         <div className="relative z-[3] mx-auto flex min-h-[min(92dvh,880px)] max-w-[1240px] flex-col justify-end px-[clamp(16px,4vw,40px)] pb-14 pt-16 sm:justify-center sm:pb-20">
-          <p className="home-hero-fade-up font-display text-[clamp(26px,3.5vw,38px)] font-extrabold tracking-[-.03em] text-white">
-            National Select Urgent Care
-          </p>
-          <h1 className="home-hero-fade-up home-hero-delay-1 mt-3 max-w-[11em] font-display text-[clamp(42px,7vw,72px)] font-extrabold leading-[1.02] tracking-[-.035em] text-white">
+          <h1 className="home-hero-fade-up max-w-[11em] font-display text-[clamp(42px,7vw,72px)] font-extrabold leading-[1.02] tracking-[-.035em] text-white">
             Feel better sooner.
           </h1>
-          <p className="home-hero-fade-up home-hero-delay-2 mt-5 max-w-[30em] text-[clamp(16px,1.7vw,19px)] leading-[1.55] text-white/80">
+          <p className="home-hero-fade-up home-hero-delay-1 mt-5 max-w-[30em] text-[clamp(16px,1.7vw,19px)] leading-[1.55] text-white/80">
             Walk-in urgent care and primary care in Silver Spring. Most patients are seen, treated,
             and home within an hour.
           </p>
-          <div className="home-hero-fade-up home-hero-delay-3 mt-8 flex flex-wrap gap-3">
+          <div className="home-hero-fade-up home-hero-delay-2 mt-8 flex flex-wrap gap-3">
             <CheckInButton className={btnPrimary} />
             <Link href="/contact" className={btnGhost}>
               Hours &amp; location
