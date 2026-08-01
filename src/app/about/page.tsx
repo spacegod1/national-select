@@ -2,12 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { Container, Eyebrow } from "@/components/ui";
+import { CheckInButton } from "@/components/booking-modal";
 import { STATS, VALUES } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "About — National Select Urgent Care",
   description:
-    "An independent clinic that belongs to its neighborhood. We opened National Select Urgent Care because getting seen shouldn't mean a five-hour wait or a bill you can't read.",
+    "An independent clinic rooted in Silver Spring. We opened National Select Urgent Care because getting seen shouldn't mean a five-hour wait or a bill you can't read.",
 };
 
 const STORY = [
@@ -21,23 +22,18 @@ export default function AboutPage() {
   return (
     <main className="bg-[#f8f9fa] overflow-hidden">
       {/* Hero Section */}
-      <section className="mx-auto max-w-[1240px] px-[clamp(16px,4vw,40px)] py-[clamp(40px,8vw,100px)] grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-10 items-center">
+      <section className="mx-auto max-w-[1240px] px-[clamp(16px,4vw,40px)] pt-[clamp(20px,3.5vw,48px)] pb-[clamp(40px,8vw,100px)] grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-10 items-center">
         <div data-reveal className="max-w-[500px]">
-          <div className="inline-block rounded-full bg-red-100/60 px-4 py-1.5 mb-6">
-             <span className="text-[#e8342b] font-mono text-sm font-bold tracking-widest uppercase">
-               Regular care running low on clinic
-             </span>
-          </div>
           <h1 className="font-display text-[clamp(40px,5vw,64px)] font-extrabold leading-[1.05] tracking-[-.03em] text-[#0d1b2a] mb-6">
-            A clinic that belongs to its neighborhood.
+            A clinic that belongs to this community.
           </h1>
           <p className="text-[18px] leading-[1.6] text-slate-600 mb-8 max-w-[400px]">
             We opened National Select Urgent Care because getting seen shouldn't mean a five-hour wait or a bill you can't read.
           </p>
-          <button className="rounded-[12px] bg-[#c1121f] hover:bg-[#a00f1a] px-8 py-3.5 text-[16px] font-bold text-white transition-colors flex items-center gap-2">
+          <CheckInButton className="rounded-[12px] bg-[#c1121f] hover:bg-[#a00f1a] px-8 py-3.5 text-[16px] font-bold text-white transition-colors flex items-center gap-2">
             Check in online
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-          </button>
+          </CheckInButton>
         </div>
         
         <div data-reveal className="relative mt-8 lg:mt-0">

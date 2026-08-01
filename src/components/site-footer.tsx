@@ -31,7 +31,7 @@ export function SiteFooter() {
             className="mb-[18px] block h-11 w-auto"
           />
           <p className="mb-4 max-w-[26em] text-[15.5px] leading-[1.6] opacity-70">
-            Your neighborhood walk-in clinic. Independent urgent care and primary care in Silver
+            Your local walk-in clinic. Independent urgent care and primary care in Silver
             Spring, Maryland.
           </p>
           <div className="text-[15.5px] leading-[1.7] opacity-85">

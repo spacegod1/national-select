@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Container } from "@/components/ui";
+import { CheckInButton } from "@/components/booking-modal";
 import { CLINIC, INSURERS, PRICES } from "@/lib/site-data";
 
 export const metadata: Metadata = {
@@ -117,7 +118,7 @@ export default function InsurancePage() {
               <div>
                 <h3 className="text-[18px] font-bold text-white mb-1">Financial hardship?</h3>
                 <p className="text-[15px] text-slate-300 leading-[1.6]">
-                  Ask at the front desk. We keep a sliding scale for neighbors who need it, and nobody is turned away for a same-day emergency assessment.
+                  Ask at the front desk. We keep a sliding scale for those who need it, and nobody is turned away for a same-day emergency assessment.
                 </p>
               </div>
             </div>
@@ -193,12 +194,17 @@ export default function InsurancePage() {
               </p>
             </div>
             <div className="flex gap-4">
-              <button className="rounded-[12px] bg-[#e8342b] hover:bg-[#c1121f] px-8 py-3.5 text-[16px] font-bold text-white transition-colors">
+              <CheckInButton className="rounded-[12px] bg-[#e8342b] hover:bg-[#c1121f] px-8 py-3.5 text-[16px] font-bold text-white transition-colors">
                 Check in now
-              </button>
-              <button className="rounded-[12px] border border-white/20 bg-white/10 hover:bg-white/20 px-8 py-3.5 text-[16px] font-bold text-white transition-colors">
+              </CheckInButton>
+              <a
+                href={CLINIC.mapsHref}
+                target="_blank"
+                rel="noopener"
+                className="rounded-[12px] border border-white/20 bg-white/10 hover:bg-white/20 px-8 py-3.5 text-[16px] font-bold !text-white no-underline transition-colors hover:no-underline"
+              >
                 Find directions
-              </button>
+              </a>
             </div>
           </div>
         </Container>

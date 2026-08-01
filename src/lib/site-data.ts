@@ -240,20 +240,46 @@ export type Provider = {
   focus: string[];
   education: string;
   languages: string;
+  /** Clinicians who accept scheduled appointments (not front-desk / nursing support). */
+  bookable?: boolean;
+  /**
+   * Headshot path under /public. Convention: `/providers/{id}.jpg`.
+   * Leave undefined until the file is added — UI shows a reserved photo frame.
+   */
+  photo?: string;
 };
 
 export const PROVIDERS: Provider[] = [
   {
+    id: "wornyo",
+    initials: "JW",
+    name: "James Dotse Wornyo, M.D.",
+    title: "Medical Director, Family Medicine",
+    tint: "#DDE6F4",
+    ink: "#1B2A4A",
+    short:
+      "Family medicine physician focused on clear explanations, careful exams and practical next steps.",
+    bio1:
+      "Dr. Wornyo cares for patients across urgent and primary care visits, with a calm approach that puts people at ease from the moment they sit down. He takes time to explain what he is seeing, what it means, and what to do next — in plain language.",
+    bio2:
+      "Patients appreciate that he asks the follow-up questions others skip, and that he treats same-day illnesses with the same thoroughness he brings to scheduled visits.",
+    quote: "Good medicine starts with listening long enough to understand the whole story.",
+    focus: ["Acute illness", "Family medicine", "Preventive care", "Patient education"],
+    education: "MD. Board-certified physician.",
+    languages: "English",
+    bookable: true,
+  },
+  {
     id: "okafor",
     initials: "AO",
     name: "Dr. Amara Okafor",
-    title: "Medical Director, Family Medicine",
+    title: "Staff Physician",
     tint: "#FCEEED",
     ink: "#E8342B",
     short:
       "Founded the clinic after twelve years in emergency medicine. Sees patients of every age, from six months up.",
     bio1:
-      "Dr. Okafor spent twelve years in hospital emergency departments across Maryland and the District before opening National Select Urgent Care. She started the clinic with a simple goal: give her neighbors the same quality of care she gave in the ER, without the wait or the bill.",
+      "Dr. Okafor spent twelve years in hospital emergency departments across Maryland and the District before opening National Select Urgent Care. She started the clinic with a simple goal: give local families the same quality of care she gave in the ER, without the wait or the bill.",
     bio2:
       "She is board certified in family medicine and holds a certificate in emergency ultrasound. She sees patients six days a week and still takes the last walk-in of the evening herself more often than she should.",
     quote:
@@ -261,6 +287,7 @@ export const PROVIDERS: Provider[] = [
     focus: ["Acute illness", "Pediatric urgent care", "Chronic disease", "Bedside ultrasound"],
     education: "MD, University of Maryland School of Medicine. Family medicine residency, MedStar Franklin Square.",
     languages: "English, Igbo",
+    bookable: true,
   },
   {
     id: "reyes",
@@ -278,6 +305,7 @@ export const PROVIDERS: Provider[] = [
     focus: ["Sprains and fractures", "Laceration repair", "Sports injuries", "Splinting"],
     education: "MS Physician Assistant Studies, Towson University. ATC, Penn State.",
     languages: "English, Spanish",
+    bookable: true,
   },
   {
     id: "hartley",
@@ -295,6 +323,7 @@ export const PROVIDERS: Provider[] = [
     focus: ["Women's health", "Primary care", "Preventive screening", "Contraception"],
     education: "MSN, Johns Hopkins University School of Nursing. BSN, University of Maryland.",
     languages: "English",
+    bookable: true,
   },
   {
     id: "silva",
@@ -312,6 +341,7 @@ export const PROVIDERS: Provider[] = [
     focus: ["Diabetes and blood pressure", "EKG interpretation", "Adult primary care", "Complex diagnosis"],
     education: "MD, Georgetown University. Internal medicine residency, Sinai Hospital Baltimore.",
     languages: "English, Portuguese",
+    bookable: true,
   },
   {
     id: "nguyen",
@@ -341,7 +371,7 @@ export const PROVIDERS: Provider[] = [
     bio1:
       "Tasha has worked in medical billing and front-office care for fifteen years, and she is the reason our prices are posted publicly. If a bill looks wrong to you, she will get on the phone with your insurer herself.",
     bio2:
-      "She also manages records requests, payment plans and our sliding-scale program for neighbors going through a hard stretch.",
+      "She also manages records requests, payment plans and our sliding-scale program for people going through a hard stretch.",
     quote: "Nobody should get a bill they cannot understand. If you cannot read it, call me.",
     focus: ["Insurance verification", "Billing questions", "Payment plans", "Medical records"],
     education: "Certified Professional Biller (CPB), AAPC.",
@@ -439,7 +469,7 @@ export const VALUES = [
   {
     title: "We are honest about cost",
     body:
-      "Prices up front, itemised receipts, and a sliding scale for neighbors who need it. We'd rather you come in than avoid care.",
+      "Prices up front, itemised receipts, and a sliding scale for those who need it. We'd rather you come in than avoid care.",
   },
   {
     title: "We know when to send you elsewhere",
@@ -452,7 +482,7 @@ export const STATS = [
   { value: "7 days", label: "Open every week, including evenings and weekends" },
   { value: "42 min", label: "Average time from walking in to walking out" },
   { value: "11", label: "Clinicians and staff, all permanent team members" },
-  { value: "18k+", label: "Neighbors cared for since we opened" },
+  { value: "18k+", label: "Patients cared for since we opened" },
 ] as const;
 
 export const RESOURCE_CARDS = [
