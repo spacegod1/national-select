@@ -96,6 +96,152 @@ body {
   }
 }
 
+/* Homepage cinematic hero entrances — transform/opacity only, ease-out */
+@keyframes home-hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes home-hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Subtle settle-in on a wrapper so <img> object-fit framing stays undistorted. */
+@keyframes home-hero-ken {
+  from {
+    transform: scale(var(--home-hero-ken-from, 1.035));
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.home-hero-fade-up {
+  animation: home-hero-fade-up 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.home-hero-ken {
+  --home-hero-ken-from: 1.04;
+  transform-origin: center center;
+  will-change: transform;
+  animation: home-hero-ken 6.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (min-width: 1024px) {
+  .home-hero-ken {
+    --home-hero-ken-from: 1.02;
+  }
+}
+
+/* Crossfade hero slideshow */
+.home-hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 0;
+  transform-origin: center center;
+  transition: opacity 1.45s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.home-hero-slide.is-active {
+  opacity: 1;
+  z-index: 1;
+  --home-hero-ken-from: 1.035;
+  animation: home-hero-ken 6.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (min-width: 1024px) {
+  .home-hero-slide.is-active {
+    --home-hero-ken-from: 1.018;
+  }
+}
+.home-hero-delay-1 {
+  animation-delay: 60ms;
+}
+.home-hero-delay-2 {
+  animation-delay: 120ms;
+}
+.home-hero-delay-3 {
+  animation-delay: 180ms;
+}
+.home-hero-delay-4 {
+  animation-delay: 240ms;
+}
+.home-hero-press:active {
+  transform: scale(0.97);
+  transition: transform 100ms ease-out;
+}
+
+/* Insurance logo marquee — slow drift, grayscale → color on hover/touch */
+.insurer-marquee {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.insurer-marquee-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.35rem 0;
+  animation: insurer-marquee-scroll 48s linear infinite;
+}
+.insurer-marquee:hover .insurer-marquee-track,
+.insurer-marquee:focus-within .insurer-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes insurer-marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.insurer-logo {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 120px;
+  height: 56px;
+  padding: 0.35rem 0.85rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: default;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.insurer-logo-img {
+  width: auto;
+  max-width: 148px;
+  height: 42px;
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.05);
+  opacity: 0.72;
+  transition:
+    filter 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 220ms ease-out;
+}
+.insurer-logo:hover .insurer-logo-img,
+.insurer-logo:focus-visible .insurer-logo-img,
+.insurer-logo.is-color .insurer-logo-img {
+  filter: grayscale(0) contrast(1);
+  opacity: 1;
+  transform: scale(1.04);
+}
+.insurer-logo:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
 /* Reveal-on-scroll (mirrors the source's IntersectionObserver reveal) */
 [data-reveal] {
   opacity: 0;
@@ -147,6 +293,38 @@ body {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+  .home-hero-fade-up,
+  .home-hero-ken,
+  .home-hero-slide.is-active {
+    animation: home-hero-fade 200ms ease both;
+  }
+  .home-hero-slide {
+    transition: none;
+  }
+  .home-hero-delay-1,
+  .home-hero-delay-2,
+  .home-hero-delay-3,
+  .home-hero-delay-4 {
+    animation-delay: 0ms;
+  }
+  .insurer-marquee-track {
+    animation: none !important;
+    flex-wrap: wrap;
+    width: auto;
+    max-width: 1240px;
+    margin-inline: auto;
+    justify-content: center;
+    row-gap: 0.75rem;
+  }
+  /* Hide the duplicated half used for seamless scrolling */
+  .insurer-marquee-track .insurer-logo:nth-child(n + 11) {
+    display: none;
+  }
+  .insurer-marquee {
+    mask-image: none;
+    -webkit-mask-image: none;
+    overflow: visible;
   }
   * {
     animation-duration: 0.001ms !important;

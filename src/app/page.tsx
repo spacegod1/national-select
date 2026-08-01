@@ -1,116 +1,144 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Container, Eyebrow } from "@/components/ui";
-import { PlusMark } from "@/components/icons";
+import { Eyebrow } from "@/components/ui";
 import { CheckInButton } from "@/components/booking-modal";
-import { HeroStatusStrip, TodayCard, HoursTable } from "@/components/live-widgets";
-import { CLINIC, INSURERS, REASONS, SERVICES, TESTIMONIALS } from "@/lib/site-data";
+import { HeroBackground } from "@/components/hero-background";
+import { InsuranceMarquee } from "@/components/insurance-marquee";
+import { HeroCinematicStatus, HoursTable } from "@/components/live-widgets";
+import { CLINIC, REASONS, SERVICES, TESTIMONIALS } from "@/lib/site-data";
 
 const btnPrimary =
-  "inline-block rounded-[13px] bg-[#e8342b] px-7 py-4 text-[17px] font-semibold shadow-[0_10px_26px_rgba(232,52,43,.26)] transition-all hover:-translate-y-0.5 hover:bg-[#ce291f] !text-white no-underline hover:no-underline";
+  "home-hero-press inline-block rounded-[12px] bg-brand px-7 py-3.5 text-[16px] font-semibold text-white transition-colors hover:bg-brand-press";
+const btnGhost =
+  "home-hero-press inline-block rounded-[12px] border border-white/40 bg-white/10 px-6 py-3.5 text-[16px] font-semibold !text-white no-underline backdrop-blur-sm transition-colors hover:bg-white/20 hover:no-underline";
 const btnOutline =
-  "inline-block rounded-[13px] border-[1.5px] border-ink px-[26px] py-4 text-[17px] font-semibold !text-ink no-underline transition-colors hover:!bg-ink hover:!text-mist hover:no-underline";
+  "home-hero-press inline-block rounded-xl border-[1.5px] border-ink px-6 py-3.5 text-[15px] font-semibold !text-ink no-underline transition-colors hover:!bg-ink hover:!text-mist hover:no-underline";
 
-const QUICK_CARDS = [
-  { title: "Find us", body: "1420 Birchwood Ave, Silver Spring. Free parking at the door.", cta: "Get directions", href: "/contact" },
-  { title: "Services", body: "Illnesses, injuries, physicals, labs, X-ray and vaccines.", cta: "See what we treat", href: "/services" },
-  { title: "Patient resources", body: "Portal sign-in, forms, records requests and answers.", cta: "Open resources", href: "/resources" },
-  { title: "Pay a bill", body: "Pay online in a minute, or set up a payment plan.", cta: "Pay my bill", href: "/billing" },
-];
+const QUICK_TILES = [
+  {
+    title: "Find us",
+    cta: "Get directions",
+    href: "/contact",
+    img: "/stethoscope_desk.png",
+  },
+  {
+    title: "Services",
+    cta: "See what we treat",
+    href: "/services",
+    img: "/xray_room.png",
+  },
+  {
+    title: "Patient resources",
+    cta: "Open resources",
+    href: "/resources",
+    img: "/doctor-writing-notes.jpg",
+  },
+  {
+    title: "Pay a bill",
+    cta: "Pay my bill",
+    href: "/billing",
+    img: "/examining-xray-scan.jpg",
+  },
+] as const;
 
 export default function HomePage() {
   return (
     <main>
       {/* HERO */}
-      <section className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(330px,1fr))] items-center gap-[clamp(32px,5vw,64px)] px-[clamp(16px,4vw,40px)] pb-[clamp(28px,4vw,44px)] pt-[clamp(36px,6vw,76px)]">
-        <div>
-          <div className="mb-[22px] inline-flex items-center gap-[9px] rounded-full border border-pink-line bg-pink py-[7px] pl-2.5 pr-3.5 text-[13.5px] font-semibold text-[#b4231c]">
-            <PlusMark cross="#E8342B" check="#FCEEED" className="h-[15px] w-[15px]" />
-            Your local walk-in clinic
-          </div>
-          <h1 className="mb-5 font-display text-[clamp(40px,6.2vw,68px)] font-extrabold leading-[1.03] tracking-[-.03em] text-balance">
-            Feel better sooner.
-            <br />
-            We&apos;ll take it from here.
-          </h1>
-          <p className="mb-7 max-w-[34em] text-[clamp(17px,1.7vw,20px)] leading-[1.55] text-muted text-pretty">
-            Urgent care and primary care under one roof in Silver Spring. Walk in any time we&apos;re
-            open, or check in online and hold your place from the couch.
+      <section className="relative min-h-[min(92dvh,880px)] overflow-hidden">
+        <HeroBackground />
+        <div className="absolute inset-0 z-[2] bg-gradient-to-r from-ink/90 via-ink/55 to-ink/20" />
+        <div className="absolute inset-0 z-[2] bg-gradient-to-t from-ink/70 via-transparent to-ink/30" />
+        <div className="relative z-[3] mx-auto flex min-h-[min(92dvh,880px)] max-w-[1240px] flex-col justify-end px-[clamp(16px,4vw,40px)] pb-14 pt-16 sm:justify-center sm:pb-20">
+          <p className="home-hero-fade-up font-display text-[clamp(26px,3.5vw,38px)] font-extrabold tracking-[-.03em] text-white">
+            National Select Urgent Care
           </p>
-          <div className="mb-[26px] flex flex-wrap gap-3">
+          <h1 className="home-hero-fade-up home-hero-delay-1 mt-3 max-w-[11em] font-display text-[clamp(42px,7vw,72px)] font-extrabold leading-[1.02] tracking-[-.035em] text-white">
+            Feel better sooner.
+          </h1>
+          <p className="home-hero-fade-up home-hero-delay-2 mt-5 max-w-[30em] text-[clamp(16px,1.7vw,19px)] leading-[1.55] text-white/80">
+            Walk-in urgent care and primary care in Silver Spring. Most patients are seen, treated,
+            and home within an hour.
+          </p>
+          <div className="home-hero-fade-up home-hero-delay-3 mt-8 flex flex-wrap gap-3">
             <CheckInButton className={btnPrimary} />
-            <Link href="/contact" className={btnOutline}>
-              Find our hours &amp; location
+            <Link href="/contact" className={btnGhost}>
+              Hours &amp; location
             </Link>
           </div>
-          <HeroStatusStrip />
-        </div>
-        <div className="relative min-h-[340px]">
-          <TodayCard />
+          <HeroCinematicStatus />
         </div>
       </section>
 
-      {/* QUICK ACCESS */}
-      <Container as="section">
-        <div data-reveal className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-3.5">
-          {QUICK_CARDS.map((c) => (
-            <Link
-              key={c.title}
-              href={c.href}
-              className="flex flex-col gap-2.5 rounded-[18px] border border-line bg-white px-[22px] py-6 text-left no-underline transition-all hover:-translate-y-[3px] hover:border-[#B9C6D8] hover:no-underline hover:shadow-[0_14px_32px_rgba(27,42,74,.09)]"
-            >
-              <span className="grid h-[38px] w-[38px] place-items-center rounded-[11px] bg-pink">
-                <PlusMark className="h-[19px] w-[19px]" />
-              </span>
-              <span className="font-display text-[19px] font-bold tracking-[-.015em] text-ink">
-                {c.title}
-              </span>
-              <span className="text-[14.5px] leading-[1.5] text-muted">{c.body}</span>
-              <span className="mt-0.5 text-[14px] font-semibold text-[#e8342b]">{c.cta} →</span>
-            </Link>
-          ))}
-        </div>
-      </Container>
+      {/* QUICK ACCESS — photo tiles */}
+      <section className="mx-auto grid max-w-[1240px] grid-cols-2 gap-3 px-[clamp(16px,4vw,40px)] py-10 md:grid-cols-4">
+        {QUICK_TILES.map((c) => (
+          <Link
+            key={c.title}
+            href={c.href}
+            data-reveal
+            className="group relative aspect-[4/3] overflow-hidden rounded-2xl no-underline hover:no-underline"
+          >
+            <Image
+              src={c.img}
+              alt=""
+              fill
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+              sizes="(max-width: 768px) 50vw, 25vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/25 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+              <div className="font-display text-[17px] font-bold">{c.title}</div>
+              <div className="mt-0.5 text-[13px] text-white/75">{c.cta} →</div>
+            </div>
+          </Link>
+        ))}
+      </section>
 
       {/* WHY CHOOSE US */}
-      <Container as="section" className="py-[clamp(56px,8vw,104px)]">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-[clamp(30px,5vw,70px)]">
-          <div data-reveal>
-            <Eyebrow>Why patients choose us</Eyebrow>
-            <h2 className="mb-[18px] font-display text-[clamp(30px,4vw,46px)] font-extrabold leading-[1.06] tracking-[-.028em] text-balance">
-              Real care, without the runaround.
-            </h2>
-            <p className="mb-6 max-w-[34em] text-[17.5px] leading-[1.6] text-muted text-pretty">
-              We&apos;re independent — not part of a hospital system. That means we answer to our
-              patients, keep our prices honest, and take the time to actually listen.
-            </p>
-            <Link
-              href="/about"
-              className="inline-block rounded-[12px] border-[1.5px] border-ink px-6 py-3.5 text-[16px] font-semibold !text-ink no-underline transition-colors hover:!bg-ink hover:!text-mist hover:no-underline"
-            >
-              More about our clinic
-            </Link>
-          </div>
-          <ul data-reveal className="flex flex-col gap-0.5">
+      <section className="mx-auto grid max-w-[1240px] items-center gap-10 px-[clamp(16px,4vw,40px)] py-[clamp(56px,8vw,96px)] lg:grid-cols-2">
+        <div data-reveal className="relative aspect-[4/5] overflow-hidden rounded-[28px]">
+          <Image
+            src="/clinician_consultation.png"
+            alt="Clinician with patient"
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        </div>
+        <div data-reveal>
+          <Eyebrow>Why patients choose us</Eyebrow>
+          <h2 className="mb-4 font-display text-[clamp(30px,4vw,46px)] font-extrabold tracking-[-.028em] text-balance">
+            Real care, without the runaround.
+          </h2>
+          <p className="mb-6 max-w-[34em] text-[17px] leading-[1.6] text-muted text-pretty">
+            We&apos;re independent — not part of a hospital system. We answer to our patients, keep
+            prices honest, and take the time to listen.
+          </p>
+          <ul className="mb-6 flex flex-col">
             {REASONS.map((r) => (
-              <li key={r.title} className="flex gap-4 border-b border-line py-5">
-                <PlusMark check="#F2F5FA" className="mt-0.5 h-6 w-6 flex-none" />
-                <div>
-                  <div className="mb-1 text-[17.5px] font-semibold text-ink">{r.title}</div>
-                  <div className="text-[15.5px] leading-[1.55] text-muted">{r.body}</div>
-                </div>
+              <li key={r.title} className="border-b border-line py-4">
+                <div className="font-semibold text-ink">{r.title}</div>
+                <div className="mt-1 text-[15px] leading-[1.5] text-muted">{r.body}</div>
               </li>
             ))}
           </ul>
+          <Link
+            href="/about"
+            className="inline-block rounded-[12px] border-[1.5px] border-ink px-6 py-3.5 text-[16px] font-semibold !text-ink no-underline transition-colors hover:!bg-ink hover:!text-mist hover:no-underline"
+          >
+            More about our clinic
+          </Link>
         </div>
-      </Container>
+      </section>
 
-      {/* SERVICES PREVIEW */}
+      {/* SERVICES */}
       <section className="bg-ink text-cloud">
-        <Container className="py-[clamp(56px,8vw,100px)]">
-          <div data-reveal className="mb-9 flex flex-wrap items-end justify-between gap-5">
+        <div className="mx-auto max-w-[1240px] px-[clamp(16px,4vw,40px)] py-[clamp(56px,8vw,96px)]">
+          <div data-reveal className="mb-8 flex flex-wrap items-end justify-between gap-5">
             <div>
               <Eyebrow tone="coral">What we treat</Eyebrow>
-              <h2 className="font-display text-[clamp(30px,4vw,46px)] font-extrabold leading-[1.06] tracking-[-.028em] text-balance">
+              <h2 className="font-display text-[clamp(30px,4vw,46px)] font-extrabold tracking-[-.028em] text-balance">
                 From sore throats to stitches.
               </h2>
             </div>
@@ -121,113 +149,86 @@ export default function HomePage() {
               See all services
             </Link>
           </div>
-          <div data-reveal className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-3.5">
+          <div data-reveal className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {SERVICES.map((s) => (
               <Link
                 key={s.id}
                 href={`/services/${s.id}`}
-                className="flex flex-col gap-2 rounded-[18px] border border-cloud/15 bg-cloud/[.07] p-[22px] !text-cloud no-underline transition-all hover:-translate-y-[3px] hover:bg-cloud/15 hover:no-underline"
+                className="rounded-2xl border border-cloud/15 bg-cloud/[.07] p-5 !text-cloud no-underline transition-colors hover:bg-cloud/15 hover:no-underline"
               >
-                <span className="font-display text-[19px] font-bold tracking-[-.015em]">{s.name}</span>
-                <span className="text-[14.5px] leading-[1.5] opacity-70">{s.blurb}</span>
-                <span className="mt-1 font-mono text-[12px] tracking-[.06em] opacity-55">
-                  {s.items.length} conditions
-                </span>
+                <div className="font-display text-[18px] font-bold">{s.name}</div>
+                <div className="mt-1.5 text-[14px] leading-[1.5] text-cloud-soft">{s.blurb}</div>
               </Link>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* TESTIMONIALS */}
-      <Container as="section" className="py-[clamp(56px,8vw,100px)]">
-        <div data-reveal className="mb-[38px] text-center">
+      <section className="mx-auto max-w-[1240px] px-[clamp(16px,4vw,40px)] py-[clamp(56px,8vw,96px)]">
+        <div data-reveal className="mb-8">
           <Eyebrow>From our patients</Eyebrow>
-          <h2 className="font-display text-[clamp(30px,4vw,46px)] font-extrabold leading-[1.06] tracking-[-.028em] text-balance">
+          <h2 className="font-display text-[clamp(30px,4vw,42px)] font-extrabold tracking-[-.028em] text-balance">
             What people say after their visit
           </h2>
         </div>
-        <div data-reveal className="grid grid-cols-[repeat(auto-fit,minmax(290px,1fr))] gap-4">
+        <div data-reveal className="grid gap-4 md:grid-cols-3">
           {TESTIMONIALS.map((t) => (
-            <figure
-              key={t.name}
-              className="flex flex-col gap-4 rounded-[20px] border border-line bg-white px-[26px] py-7"
-            >
-              <div className="text-[15px] text-[#e8342b]" aria-label="Five out of five stars">
+            <figure key={t.name} className="rounded-2xl border border-line bg-white p-6">
+              <div className="text-brand" aria-label="Five out of five stars">
                 ★★★★★
               </div>
-              <blockquote className="text-[17.5px] leading-[1.55] text-ink text-pretty">
+              <blockquote className="mt-3 text-[16px] leading-[1.55] text-ink text-pretty">
                 {t.quote}
               </blockquote>
-              <figcaption className="mt-auto flex items-center gap-3 pt-1.5">
-                <span className="grid h-10 w-10 flex-none place-items-center rounded-full bg-panel text-[14.5px] font-semibold text-ink">
-                  {t.initials}
-                </span>
-                <span className="text-[14.5px] text-muted">
-                  <strong className="font-semibold text-ink">{t.name}</strong>
-                  <br />
-                  {t.meta}
-                </span>
+              <figcaption className="mt-4 text-[14px] text-muted">
+                <strong className="text-ink">{t.name}</strong> · {t.meta}
               </figcaption>
             </figure>
           ))}
         </div>
-      </Container>
+      </section>
 
-      {/* INSURANCE STRIP */}
+      {/* INSURANCE */}
       <section className="border-y border-line bg-panel">
-        <Container className="py-[clamp(40px,6vw,64px)]">
+        <div className="mx-auto max-w-[1240px] px-[clamp(16px,4vw,40px)] py-12">
           <div data-reveal className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <h2 className="font-display text-[clamp(21px,2.4vw,27px)] font-bold tracking-[-.02em]">
+            <h2 className="font-display text-[24px] font-bold tracking-[-.02em]">
               We accept most major insurance
             </h2>
-            <Link href="/insurance" className="text-[16px] font-semibold text-[#e8342b] no-underline hover:text-[#b4231c] hover:no-underline">
+            <Link
+              href="/insurance"
+              className="text-[16px] font-semibold text-brand no-underline hover:text-brand-dark hover:no-underline"
+            >
               See all plans &amp; self-pay prices →
             </Link>
           </div>
-          <div data-reveal className="flex flex-wrap gap-2.5">
-            {INSURERS.map((ins) => (
-              <span
-                key={ins}
-                className="rounded-[11px] border border-line bg-white px-[18px] py-[11px] font-display text-[15px] font-semibold tracking-[-.01em] text-ink"
-              >
-                {ins}
-              </span>
-            ))}
-          </div>
-        </Container>
+          <InsuranceMarquee />
+        </div>
       </section>
 
       {/* HOURS + WALK-IN */}
-      <Container as="section" className="py-[clamp(56px,8vw,100px)]">
-        <div
-          data-reveal
-          className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-center gap-[clamp(24px,4vw,48px)] rounded-[24px] border border-line bg-white p-[clamp(26px,4vw,48px)]"
-        >
-          <div>
-            <Eyebrow>Walk-ins welcome</Eyebrow>
-            <h2 className="mb-4 font-display text-[clamp(28px,3.6vw,42px)] font-extrabold leading-[1.07] tracking-[-.028em] text-balance">
-              Open seven days a week, including evenings.
-            </h2>
-            <p className="mb-6 text-[17px] leading-[1.6] text-muted text-pretty">
-              Come in whenever you need us. Checking in online just means less time in the waiting
-              room — you&apos;ll still be seen if you simply walk through the door.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <CheckInButton className="rounded-[12px] bg-[#e8342b] px-[26px] py-[15px] text-[16px] font-semibold text-white transition-colors hover:bg-[#ce291f]" />
-              <a
-                href={CLINIC.phoneHref}
-                className="rounded-[12px] border-[1.5px] border-ink px-6 py-[15px] text-[16px] font-semibold !text-ink no-underline transition-colors hover:!bg-ink hover:!text-mist hover:no-underline"
-              >
-                Call {CLINIC.phone}
-              </a>
-            </div>
-          </div>
-          <div className="rounded-[18px] border border-line bg-mist px-[22px] py-2">
-            <HoursTable note />
+      <section className="mx-auto grid max-w-[1240px] items-center gap-10 px-[clamp(16px,4vw,40px)] py-[clamp(56px,8vw,96px)] lg:grid-cols-2">
+        <div data-reveal>
+          <Eyebrow>Walk-ins welcome</Eyebrow>
+          <h2 className="mb-4 font-display text-[clamp(28px,3.6vw,40px)] font-extrabold tracking-[-.028em] text-balance">
+            Open seven days a week, including evenings.
+          </h2>
+          <p className="mb-6 text-[16.5px] leading-[1.6] text-muted text-pretty">
+            Come in whenever you need us. Checking in online just means less time in the waiting
+            room.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <CheckInButton className="home-hero-press rounded-xl bg-brand px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-press" />
+            <a href={CLINIC.phoneHref} className={btnOutline}>
+              Call {CLINIC.phone}
+            </a>
           </div>
         </div>
-      </Container>
+        <div data-reveal className="rounded-2xl border border-line bg-white px-[22px] py-2">
+          <HoursTable note />
+        </div>
+      </section>
     </main>
   );
 }

@@ -416,6 +416,20 @@ export const INSURERS = [
   "Kaiser (out-of-network)",
 ] as const;
 
+/** Logo marks for the homepage insurance marquee (local public assets). */
+export const INSURER_LOGOS = [
+  { name: "Aetna", src: "/insurers/aetna.svg", width: 140 },
+  { name: "CareFirst BlueCross BlueShield", src: "/insurers/carefirst.svg", width: 150 },
+  { name: "Cigna", src: "/insurers/cigna.svg", width: 120 },
+  { name: "UnitedHealthcare", src: "/insurers/unitedhealthcare.svg", width: 168 },
+  { name: "Medicare", src: "/insurers/medicare.svg", width: 140 },
+  { name: "Maryland Medicaid", src: "/insurers/maryland-medicaid.svg", width: 150 },
+  { name: "Johns Hopkins Health Plans", src: "/insurers/johns-hopkins-health.svg", width: 160 },
+  { name: "Humana", src: "/insurers/humana.svg", width: 130 },
+  { name: "Tricare", src: "/insurers/tricare.png", width: 130 },
+  { name: "Kaiser (out-of-network)", src: "/insurers/kaiser.png", width: 170 },
+] as const;
+
 export const PRICES = [
   { name: "Urgent care visit", note: "Exam, diagnosis and treatment plan", price: "$149" },
   { name: "Primary care visit", note: "Established or new patient, 30 minutes", price: "$129" },
