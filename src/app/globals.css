@@ -89,11 +89,29 @@ body {
     color: var(--color-brand-dark);
     text-decoration: underline;
   }
+  /* Shown when moving with the keyboard. Text fields use their border instead (below). */
   :focus-visible {
-    outline: 3px solid var(--color-brand);
-    outline-offset: 3px;
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
     border-radius: 6px;
   }
+}
+
+/* A text field shows it has focus by turning its border red, with no ring around it.
+   Left out of @layer base on purpose, so it wins over hover and focus border utilities. */
+:where(input, textarea, select):not(
+    [type="checkbox"],
+    [type="radio"],
+    [type="range"],
+    [type="file"],
+    [type="color"],
+    [type="image"],
+    [type="submit"],
+    [type="button"],
+    [type="reset"]
+  ):focus {
+  outline: none;
+  border-color: var(--color-brand);
 }
 
 /* Homepage cinematic hero entrances — transform/opacity only, ease-out */
@@ -177,6 +195,133 @@ body {
   transition: transform 100ms ease-out;
 }
 
+/* The staff area: sign-in, setup, password and the portal behind them.
+   Transform/opacity only, ease-out. The reduced-motion rule at the end of this
+   file shortens these to nothing. */
+@keyframes staff-entry-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes staff-entry-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.staff-entry-rise {
+  animation: staff-entry-rise 280ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.staff-entry-fade {
+  animation: staff-entry-fade 180ms ease-out both;
+}
+.staff-entry-delay {
+  animation-delay: 50ms;
+}
+.staff-entry-press {
+  transition:
+    background-color 150ms ease-out,
+    transform 100ms ease-out;
+}
+.staff-entry-press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* A patient's account arriving beside the list of accounts. */
+@keyframes staff-slide {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.staff-slide {
+  animation: staff-slide 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* A faint field of plus signs, the cross from the logo, fading out to the
+   left. Decoration only: put it on an empty, absolutely positioned element. */
+.staff-pluses {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9.5v7M9.5 13h7' stroke='%231b2a4a' stroke-opacity='.13' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(to left, #000 0%, transparent 92%);
+  mask-image: linear-gradient(to left, #000 0%, transparent 92%);
+}
+
+/* A staff pop-up, on a native <dialog>. It rises in over a dimmed page and
+   leaves the same way. Browsers that can't animate a dialog just show it. */
+.staff-dialog {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 160ms ease-out,
+    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+    overlay 220ms ease-out allow-discrete,
+    display 220ms ease-out allow-discrete;
+}
+.staff-dialog[open] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.staff-dialog::backdrop {
+  background-color: rgb(27 42 74 / 0);
+  transition:
+    background-color 220ms ease-out,
+    overlay 220ms ease-out allow-discrete,
+    display 220ms ease-out allow-discrete;
+}
+.staff-dialog[open]::backdrop {
+  background-color: rgb(27 42 74 / 0.5);
+}
+@starting-style {
+  .staff-dialog[open] {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .staff-dialog[open]::backdrop {
+    background-color: rgb(27 42 74 / 0);
+  }
+}
+
+/* A toast in the corner of the staff area. It rises in and leaves by the way
+   it came. The animation has no fill, so once it has played the leaving
+   transition below can take over. */
+@keyframes staff-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+.staff-toast {
+  animation: staff-toast-in 260ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition:
+    opacity 160ms ease-out,
+    transform 160ms ease-out;
+}
+.staff-toast[data-leaving] {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+/* The ring inside a button while its action runs. */
+@keyframes ns-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ns-spinner {
+  animation: ns-spin 700ms linear infinite;
+}
+
 /* Insurance logo marquee — slow drift, grayscale → color on hover/touch */
 .insurer-marquee {
   position: relative;
@@ -238,8 +383,8 @@ body {
   transform: scale(1.04);
 }
 .insurer-logo:focus-visible {
-  outline: 3px solid var(--color-brand);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
 }
 
 /* Reveal-on-scroll (mirrors the source's IntersectionObserver reveal) */
@@ -329,5 +474,9 @@ body {
   * {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+  /* Still shows that something is happening, by fading instead of turning. */
+  .ns-spinner {
+    animation: nsuc-pulse 1.2s ease-in-out infinite !important;
   }
 }
