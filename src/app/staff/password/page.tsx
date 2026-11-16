@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/staff/actions";
 import { PasswordChange } from "@/components/staff-entry";
+import { SignOutButton } from "@/components/staff-shell";
 import { requireStaff } from "@/lib/staff/session";
 
 const exitClass = "text-[14.5px] font-semibold text-muted no-underline hover:text-brand-dark hover:no-underline";
@@ -18,9 +19,7 @@ export default async function StaffPasswordPage() {
       exit={
         user.mustChangePassword ? (
           <form action={signOut}>
-            <button type="submit" className={exitClass}>
-              Sign out
-            </button>
+            <SignOutButton className={exitClass} />
           </form>
         ) : (
           <Link href="/staff" className={exitClass}>

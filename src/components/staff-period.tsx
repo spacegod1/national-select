@@ -46,7 +46,8 @@ export function PeriodFilter({
   };
 
   return (
-    <div>
+    // One box on tablets and larger screens, so the two ways of choosing dates read as one control.
+    <div className="md:rounded-[12px] md:border md:border-line md:bg-white md:p-[clamp(14px,2vw,20px)]">
       <nav aria-label="Period" className="flex flex-wrap gap-1.5">
         {allDates ? (
           <Link href={href({})} aria-current={period ? undefined : "true"} className={pill(!period)}>
@@ -72,7 +73,7 @@ export function PeriodFilter({
       <form
         key={JSON.stringify([period?.from, period?.to, keep])}
         action={path}
-        className="mt-4 flex flex-wrap items-end gap-3"
+        className="mt-4 flex flex-wrap items-end gap-3 md:border-t md:border-line-soft md:pt-4"
       >
         {/* Dates typed below win over this. Without them, the ready-made period stays. */}
         {period?.preset ? <input type="hidden" name="period" value={period.preset} /> : null}

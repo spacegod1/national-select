@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useFormStatus } from "react-dom";
 import { signOut } from "@/app/staff/actions";
+import { Busy, Spinner } from "@/components/spinner";
 import { Icon, initials, plainLink, type IconName } from "@/components/staff-ui";
 import { CLINIC } from "@/lib/site-data";
 
@@ -33,19 +35,35 @@ function useNav(admin: boolean) {
 
 const railButton = `grid h-10 w-10 place-items-center rounded-[10px] text-white/65 transition-colors duration-150 ease-out hover:bg-white/10 hover:text-white ${plainLink}`;
 
+/* The Sign out buttons. Each sits inside its form, which is how it knows the form is being sent. */
+
+function RailSignOut() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending} aria-label="Sign out" title="Sign out" className={railButton}>
+      {pending ? <Spinner className="h-5 w-5" /> : <Icon name="out" />}
+    </button>
+  );
+}
+
+/** A Sign out button in words. Put it inside a `<form action={signOut}>`. */
+export function SignOutButton({ className }: { className: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending} className={className}>
+      {pending ? <Busy>Signing out</Busy> : "Sign out"}
+    </button>
+  );
+}
+
 export function StaffRail({ name, admin }: { name: string; admin: boolean }) {
   const { section, items } = useNav(admin);
 
   return (
     <aside className="hidden w-[76px] flex-none flex-col items-center bg-ink py-3.5 md:flex">
-      <span
-        className="grid h-10 w-10 place-items-center rounded-[11px] bg-brand font-display text-[15px] font-extrabold text-white"
-        role="img"
-        aria-label="National Select staff"
-      >
-        NS
-      </span>
-      <nav aria-label="Staff" className="mt-5 flex flex-col gap-1">
+      {/* The cross from the logo. The full logo's wording is too small to read at this width. */}
+      <Image src="/logo-mark.png" alt={CLINIC.name} width={44} height={44} className="h-11 w-11" />
+      <nav aria-label="Staff" className="mt-4 flex flex-col gap-1">
         {items.map((item) => {
           const active = section === item.id;
           return (
@@ -72,9 +90,7 @@ export function StaffRail({ name, admin }: { name: string; admin: boolean }) {
           <Icon name="lock" />
         </Link>
         <form action={signOut}>
-          <button type="submit" aria-label="Sign out" title="Sign out" className={railButton}>
-            <Icon name="out" />
-          </button>
+          <RailSignOut />
         </form>
         <span
           title={`${name}, ${admin ? "Admin" : "Staff"}`}
@@ -104,9 +120,7 @@ export function StaffTopBar({ admin }: { admin: boolean }) {
             Password
           </Link>
           <form action={signOut} className="flex">
-            <button type="submit" className={topLink}>
-              Sign out
-            </button>
+            <SignOutButton className={topLink} />
           </form>
         </div>
       </header>

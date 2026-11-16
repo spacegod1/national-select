@@ -35,7 +35,7 @@ export default async function StaffLoginPage() {
           }}
         />
         <Image
-          src="/logo-light.png"
+          src="/logo-on-dark.png"
           alt={CLINIC.name}
           width={106}
           height={46}

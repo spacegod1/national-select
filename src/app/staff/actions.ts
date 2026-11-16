@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { recordAudit } from "@/lib/audit";
 import { normalizeAccountNumber, normalizeDateOfBirth } from "@/lib/billing/lookup";
+import { FLASH_COOKIE, FLASH_PATH, FLASH_SECONDS, type FlashCode } from "@/lib/staff/flash";
 import { passwordProblem } from "@/lib/staff/passwords";
 import { addCharge, createPatientAccount, voidCharge } from "@/lib/staff/records";
 import {
@@ -47,6 +49,20 @@ function field(formData: FormData, name: string): string {
 /** Passwords are read as typed, including any spaces at either end. */
 function secret(formData: FormData, name: string): string {
   return String(formData.get(name) ?? "");
+}
+
+/**
+ * Leaves a message for the page this action is about to send the person to, which
+ * shows it as a toast. Only the message's code is stored, and the browser has to be
+ * able to read it, so it is not an httpOnly cookie.
+ */
+async function flash(code: FlashCode): Promise<void> {
+  (await cookies()).set(FLASH_COOKIE, code, {
+    path: FLASH_PATH,
+    maxAge: FLASH_SECONDS,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
 }
 
 /** Reads an amount such as `149`, `149.5`, or `$1,249.00` as whole cents. */
@@ -101,6 +117,7 @@ export async function setUpFirstAdmin(_previous: StaffFormState, formData: FormD
     return { error: STAFF_DATABASE_ERROR };
   }
   if (!userId) return { error: SETUP_DONE };
+  await flash("admin-created");
   redirect("/staff");
 }
 
@@ -120,6 +137,7 @@ export async function signIn(_previous: StaffFormState, formData: FormData): Pro
     console.error("Staff: signing in failed", error);
     return { error: STAFF_DATABASE_ERROR };
   }
+  await flash("signed-in");
   redirect("/staff");
 }
 
@@ -127,6 +145,7 @@ export async function signOut(): Promise<void> {
   const user = await getCurrentStaff();
   await endStaffSession();
   if (user) await recordAudit(user, "auth.signed_out");
+  await flash("signed-out");
   redirect("/staff/login");
 }
 
@@ -163,6 +182,7 @@ export async function changePassword(_previous: StaffFormState, formData: FormDa
     console.error("Staff: changing a password failed", error);
     return { error: STAFF_DATABASE_ERROR };
   }
+  await flash("password-saved");
   redirect("/staff");
 }
 
@@ -210,27 +230,47 @@ export async function resetPassword(_previous: IssuedPasswordState, formData: Fo
   }
 }
 
+const OWN_ACCOUNT = "You can't change your own account here. Another admin can.";
+/** Why a change to a staff user didn't happen, when the database says nothing changed. */
+const NOTHING_CHANGED = "Nothing was changed. They may already be set that way, or they are the only active admin.";
+
 /** Admins change other people. Nobody deactivates or demotes themselves. */
-export async function setUserActive(formData: FormData): Promise<void> {
+export async function setUserActive(formData: FormData): Promise<StaffFormState> {
   const admin = await requireAdmin();
 
   const userId = field(formData, "userId");
   const active = field(formData, "active") === "true";
-  if (!userId || userId === admin.id) return;
+  if (!userId || userId === admin.id) return { error: OWN_ACCOUNT };
 
-  if ((await updateStaffUser(admin, userId, { active })) && !active) await endAllSessionsFor(userId);
+  let changed: boolean;
+  try {
+    changed = await updateStaffUser(admin, userId, { active });
+    if (changed && !active) await endAllSessionsFor(userId);
+  } catch (error) {
+    console.error("Staff: changing whether a staff user is active failed", error);
+    return { error: STAFF_DATABASE_ERROR };
+  }
   revalidatePath("/staff/users");
+  return { error: changed ? null : NOTHING_CHANGED };
 }
 
-export async function setUserRole(formData: FormData): Promise<void> {
+export async function setUserRole(formData: FormData): Promise<StaffFormState> {
   const admin = await requireAdmin();
 
   const userId = field(formData, "userId");
   const role = field(formData, "role");
-  if (!userId || userId === admin.id || (role !== "admin" && role !== "staff")) return;
+  if (!userId || userId === admin.id) return { error: OWN_ACCOUNT };
+  if (role !== "admin" && role !== "staff") return { error: "Choose a role." };
 
-  await updateStaffUser(admin, userId, { role });
+  let changed: boolean;
+  try {
+    changed = await updateStaffUser(admin, userId, { role });
+  } catch (error) {
+    console.error("Staff: changing a staff user's role failed", error);
+    return { error: STAFF_DATABASE_ERROR };
+  }
   revalidatePath("/staff/users");
+  return { error: changed ? null : NOTHING_CHANGED };
 }
 
 export async function createPatient(_previous: StaffFormState, formData: FormData): Promise<StaffFormState> {
@@ -262,6 +302,7 @@ export async function createPatient(_previous: StaffFormState, formData: FormDat
     console.error("Staff: creating a patient account failed", error);
     return { error: DATABASE_ERROR };
   }
+  await flash("patient-created");
   redirect(`/staff/accounts/${accountNumber}`);
 }
 

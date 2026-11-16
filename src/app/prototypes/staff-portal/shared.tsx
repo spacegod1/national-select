@@ -460,7 +460,7 @@ export function Icon({ name, className = "h-5 w-5" }: { name: IconName; classNam
 export function Logo({ light = false, className = "h-9 w-auto" }: { light?: boolean; className?: string }) {
   return (
     <Image
-      src={light ? "/logo-light.png" : "/logo.png"}
+      src={light ? "/logo-on-dark.png" : "/logo.png"}
       alt="National Select Urgent Care"
       width={106}
       height={46}

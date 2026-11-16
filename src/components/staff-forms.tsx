@@ -1,8 +1,19 @@
 "use client";
 
 import { unstable_rethrow } from "next/navigation";
-import { useActionState, useId, useRef, useState, useTransition, type FormEvent, type ReactNode } from "react";
+import {
+  useActionState,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { createPatient, postCharge, removeCharge, type StaffFormState } from "@/app/staff/actions";
+import { Busy } from "@/components/spinner";
+import { useToast } from "@/components/staff-toast";
 import { Icon, skin } from "@/components/staff-ui";
 import { CONNECTION_ERROR, formDataOf } from "@/lib/staff/forms";
 import { VOID_NOTE_MAX, VOID_REASONS, voidReasonProblem } from "@/lib/staff/void-reasons";
@@ -31,6 +42,12 @@ export function NewPatientForm({ today }: { today: string }) {
   const [values, setValues] = useState(EMPTY_PATIENT);
   const set = (name: keyof typeof EMPTY_PATIENT) => (event: { target: { value: string } }) =>
     setValues((current) => ({ ...current, [name]: event.target.value }));
+  const toast = useToast();
+
+  // The reason is shown in the form. When it works, the account's page says so instead.
+  useEffect(() => {
+    if (state.error) toast.error("Patient account not created");
+  }, [state, toast]);
 
   return (
     <form action={action} className={`${skin.card} mt-6 flex max-w-[640px] flex-col gap-4`}>
@@ -102,7 +119,7 @@ export function NewPatientForm({ today }: { today: string }) {
       </div>
       <FormError error={state.error} />
       <button type="submit" disabled={pending} className={`${skin.primary} self-start`}>
-        {pending ? "Creating account" : "Create patient account"}
+        {pending ? <Busy>Creating account</Busy> : "Create patient account"}
       </button>
     </form>
   );
@@ -125,6 +142,7 @@ export function ChargeForm({
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -141,7 +159,11 @@ export function ChargeForm({
         unstable_rethrow(thrown);
         problem = CONNECTION_ERROR;
       }
-      if (problem) return setError(problem);
+      if (problem) {
+        setError(problem);
+        return toast.error("Charge not posted");
+      }
+      toast.success("Charge posted", description.trim());
       setDescription("");
       setAmount("");
       onPosted?.();
@@ -177,7 +199,7 @@ export function ChargeForm({
           />
         </label>
         <button type="submit" disabled={pending} className={skin.primary}>
-          {pending ? "Posting" : "Post charge"}
+          {pending ? <Busy>Posting</Busy> : "Post charge"}
         </button>
       </div>
       <FormError error={error} className="mt-2.5" />
@@ -209,6 +231,7 @@ export function VoidCharge({
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
   const titleId = useId();
   const reasonName = useId();
   const needsNote = reason === "other";
@@ -238,7 +261,9 @@ export function VoidCharge({
         unstable_rethrow(thrown);
         problem = CONNECTION_ERROR;
       }
+      // A refusal is shown here in the pop-up. A toast would sit behind it, dimmed with the page.
       if (problem) return setError(problem);
+      toast.success("Charge voided", `${description} · ${amount}`);
       // The charge comes back voided, without this button. Close in case it is still here.
       dialog.current?.close();
     });
@@ -336,7 +361,7 @@ export function VoidCharge({
               disabled={pending}
               className="staff-entry-press rounded-[10px] bg-brand px-4 py-2.5 text-[14.5px] font-semibold text-white hover:bg-brand-press disabled:opacity-70"
             >
-              {pending ? "Voiding" : "Void charge"}
+              {pending ? <Busy>Voiding</Busy> : "Void charge"}
             </button>
           </div>
         </form>

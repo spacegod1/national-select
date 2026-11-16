@@ -1,9 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PeriodFilter } from "@/components/staff-period";
-import { ART, CHARGE_STATUS, Chip, DownloadLink, PageHead, Stat, StaffPage, skin } from "@/components/staff-ui";
+import { ART, CHARGE_STATUS, Chip, DownloadLink, Icon, PageHead, Stat, StaffPage, skin } from "@/components/staff-ui";
 import { formatDollars, formatStamp } from "@/lib/staff/format";
-import { choosePeriod, periodParams, presetPeriod } from "@/lib/staff/periods";
+import { PRESETS, choosePeriod, periodParams, presetPeriod, type PresetId } from "@/lib/staff/periods";
 import {
   REPORT_ROW_LIMIT,
   getPeriodReport,
@@ -18,6 +18,14 @@ import { requireAdmin } from "@/lib/staff/session";
 const ROWS_SHOWN = 50;
 /** About this many bars get a date under them, so the dates don't run into each other. */
 const BAR_LABELS = 8;
+
+/* The columns of each list on tablets and larger screens: when, what, (status,) amount. */
+const CHARGE_COLUMNS = "md:grid-cols-[128px_minmax(0,1fr)_76px_96px]";
+const PAYMENT_COLUMNS = "md:grid-cols-[128px_minmax(0,1fr)_96px]";
+const recordRow = `${skin.row} flex flex-wrap items-center gap-x-4 gap-y-1 md:grid`;
+const whenCell = `${skin.meta} tabular-nums max-md:w-[128px]`;
+const whatCell = "min-w-0 max-md:flex-1 max-md:basis-[220px]";
+const amountCell = "text-right tabular-nums max-md:ml-auto max-md:w-[92px]";
 
 const plural = (count: number, one: string, many: string) =>
   `${count.toLocaleString("en-US")} ${count === 1 ? one : many}`;
@@ -59,6 +67,7 @@ export default async function StaffReportsPage({
         <Report
           report={report}
           title={period.name}
+          preset={period.preset}
           dates={`${period.dates} · ${plural(period.days, "day", "days")}`}
           download={`/staff/export/report?${new URLSearchParams(periodParams(period))}`}
           chart={reportBuckets(period, report)}
@@ -71,12 +80,14 @@ export default async function StaffReportsPage({
 function Report({
   report,
   title,
+  preset,
   dates,
   download,
   chart,
 }: {
   report: PeriodReport;
   title: string;
+  preset: PresetId | null;
   dates: string;
   download: string;
   chart: { size: "day" | "week" | "month"; buckets: ReportBucket[] };
@@ -118,14 +129,14 @@ function Report({
           note={`${plural(totals.paymentCount, "payment", "payments")} received`}
         />
         <Stat
-          icon="activity"
+          icon="ban"
           tint="bg-line-soft text-muted"
           label="Voided"
           value={formatDollars(totals.voidedCents)}
-          note={`${plural(totals.voidCount, "charge", "charges")} posted, then voided`}
+          note={`${plural(totals.voidCount, "charge", "charges")} voided`}
         />
         <Stat
-          icon="plus"
+          icon="users"
           tint="bg-panel text-ink"
           label="New patients"
           value={report.newAccounts.toLocaleString("en-US")}
@@ -133,52 +144,62 @@ function Report({
         />
       </div>
 
-      <Chart size={chart.size} buckets={chart.buckets} />
+      {charges.length === 0 && payments.length === 0 ? (
+        <Nothing preset={preset} />
+      ) : (
+        <>
+          <Chart size={chart.size} buckets={chart.buckets} />
 
-      <Records
-        heading="Charges posted"
-        shown={Math.min(charges.length, ROWS_SHOWN)}
-        total={charges.length}
-        empty="No charges were posted on these dates."
-      >
-        {charges.slice(0, ROWS_SHOWN).map((charge) => (
-          <li key={charge.id} className={`${skin.row} flex flex-wrap items-center gap-x-4 gap-y-1`}>
-            <span className={`${skin.meta} w-[128px] tabular-nums`}>{formatStamp(charge.createdAt)}</span>
-            <span className="min-w-0 flex-1 basis-[220px]">
-              <span className="block break-words">{charge.description}</span>
-              <Patient name={charge.patientName} accountNumber={charge.accountId} />
-            </span>
-            <Chip tone={CHARGE_STATUS[charge.status].chip}>{CHARGE_STATUS[charge.status].label}</Chip>
-            <span
-              className={`ml-auto w-[92px] text-right tabular-nums ${
-                charge.status === "void" ? "text-muted line-through" : "font-semibold"
-              }`}
-            >
-              {formatDollars(charge.amountCents)}
-            </span>
-          </li>
-        ))}
-      </Records>
+          <Records
+            heading="Charges posted"
+            columns={CHARGE_COLUMNS}
+            head={["Posted", "Charge", "Status", "Amount"]}
+            sum={`${formatDollars(totals.chargedCents)} charged`}
+            shown={Math.min(charges.length, ROWS_SHOWN)}
+            total={charges.length}
+            empty="No charges were posted on these dates."
+          >
+            {charges.slice(0, ROWS_SHOWN).map((charge) => (
+              <li key={charge.id} className={`${recordRow} ${CHARGE_COLUMNS}`}>
+                <span className={whenCell}>{formatStamp(charge.createdAt)}</span>
+                <span className={whatCell}>
+                  <span className="block break-words">{charge.description}</span>
+                  <Patient name={charge.patientName} accountNumber={charge.accountId} />
+                </span>
+                <span>
+                  <Chip tone={CHARGE_STATUS[charge.status].chip}>{CHARGE_STATUS[charge.status].label}</Chip>
+                </span>
+                <span
+                  className={`${amountCell} ${charge.status === "void" ? "text-muted line-through" : "font-semibold"}`}
+                >
+                  {formatDollars(charge.amountCents)}
+                </span>
+              </li>
+            ))}
+          </Records>
 
-      <Records
-        heading="Payments received"
-        shown={Math.min(payments.length, ROWS_SHOWN)}
-        total={payments.length}
-        empty="No payments were received on these dates."
-      >
-        {payments.slice(0, ROWS_SHOWN).map((payment) => (
-          <li key={payment.id} className={`${skin.row} flex flex-wrap items-center gap-x-4 gap-y-1`}>
-            <span className={`${skin.meta} w-[128px] tabular-nums`}>{formatStamp(payment.paidAt)}</span>
-            <span className="min-w-0 flex-1 basis-[220px]">
-              <span className="block">Paid online</span>
-              <Patient name={payment.patientName} accountNumber={payment.accountId} />
-            </span>
-            <span className="ml-auto w-[92px] text-right font-semibold tabular-nums">
-              {formatDollars(payment.amountCents)}
-            </span>
-          </li>
-        ))}
-      </Records>
+          <Records
+            heading="Payments received"
+            columns={PAYMENT_COLUMNS}
+            head={["Received", "Payment", "Amount"]}
+            sum={`${formatDollars(totals.paidCents)} paid`}
+            shown={Math.min(payments.length, ROWS_SHOWN)}
+            total={payments.length}
+            empty="No payments were received on these dates."
+          >
+            {payments.slice(0, ROWS_SHOWN).map((payment) => (
+              <li key={payment.id} className={`${recordRow} ${PAYMENT_COLUMNS}`}>
+                <span className={whenCell}>{formatStamp(payment.paidAt)}</span>
+                <span className={whatCell}>
+                  <span className="block">Paid online</span>
+                  <Patient name={payment.patientName} accountNumber={payment.accountId} />
+                </span>
+                <span className={`${amountCell} font-semibold`}>{formatDollars(payment.amountCents)}</span>
+              </li>
+            ))}
+          </Records>
+        </>
+      )}
 
       <section className="mt-8">
         <h2 className={skin.heading}>More downloads</h2>
@@ -212,14 +233,49 @@ function Patient({ name, accountNumber }: { name: string; accountNumber: string 
   );
 }
 
+/** Shown once, in place of the chart and both lists, when the dates hold no charges and no payments. */
+function Nothing({ preset }: { preset: PresetId | null }) {
+  const others = PRESETS.filter((item) => (item.id === "month" || item.id === "last-month") && item.id !== preset);
+
+  return (
+    <div className={`${skin.card} mt-6 flex flex-col items-center text-center md:py-9`}>
+      <span className="grid h-11 w-11 place-items-center rounded-full bg-panel text-muted">
+        <Icon name="chart" />
+      </span>
+      <p className="mt-3 font-semibold">Nothing was charged or paid on these dates.</p>
+      <p className={`${skin.meta} mt-1`}>
+        Choose other dates above, such as{" "}
+        {others.map((item, index) => (
+          <span key={item.id}>
+            {index > 0 ? " or " : null}
+            <Link href={`/staff/reports?period=${item.id}`} className="font-semibold">
+              {item.label}
+            </Link>
+          </span>
+        ))}
+        .
+      </p>
+    </div>
+  );
+}
+
 function Records({
   heading,
+  columns,
+  head,
+  sum,
   shown,
   total,
   empty,
   children,
 }: {
   heading: string;
+  /** The grid the rows use on tablets and larger screens. */
+  columns: string;
+  /** A title for each column. The last one sits over the amounts. */
+  head: string[];
+  /** The total of the rows, such as `$240.00 charged`. */
+  sum: string;
   shown: number;
   total: number;
   empty: string;
@@ -227,13 +283,29 @@ function Records({
 }) {
   return (
     <section className="mt-8">
-      <h2 className={skin.heading}>
-        {heading} <span className="font-normal text-muted">({total.toLocaleString("en-US")})</span>
-      </h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 className={skin.heading}>
+          {heading} <span className="font-normal text-muted">({total.toLocaleString("en-US")})</span>
+        </h2>
+        {total > 0 ? <span className={`${skin.meta} tabular-nums`}>{sum}</span> : null}
+      </div>
       {total === 0 ? (
         <p className={`${skin.card} mt-2.5 text-muted`}>{empty}</p>
       ) : (
-        <ul className={`${skin.list} mt-2.5`}>{children}</ul>
+        <ul className={`${skin.list} mt-2.5`}>
+          {/* Column titles for the eye. Each row already reads in order to a screen reader. */}
+          <li
+            aria-hidden="true"
+            className={`${skin.row} hidden gap-x-4 text-[11.5px] font-semibold uppercase tracking-[.07em] text-muted md:grid ${columns}`}
+          >
+            {head.map((title, index) => (
+              <span key={title} className={index === head.length - 1 ? "text-right" : undefined}>
+                {title}
+              </span>
+            ))}
+          </li>
+          {children}
+        </ul>
       )}
       {total > shown ? (
         <p className={`${skin.meta} mt-3`}>

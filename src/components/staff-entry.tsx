@@ -4,6 +4,7 @@ import Image from "next/image";
 import { unstable_rethrow } from "next/navigation";
 import {
   useActionState,
+  useEffect,
   useId,
   useState,
   useTransition,
@@ -20,6 +21,9 @@ import {
   signIn,
   type StaffFormState,
 } from "@/app/staff/actions";
+import { Busy } from "@/components/spinner";
+import { useToast } from "@/components/staff-toast";
+import { Icon } from "@/components/staff-ui";
 import { CLINIC } from "@/lib/site-data";
 import { CONNECTION_ERROR, formDataOf } from "@/lib/staff/forms";
 
@@ -52,7 +56,11 @@ function CheckIcon({ className = "" }: { className?: string }) {
   );
 }
 
-/** A password box with a Show/Hide button and a Caps Lock warning. */
+/** How the eye button looks. Each box adds where it sits. */
+const eyeButton =
+  "absolute top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-[10px] text-muted transition-colors duration-150 ease-out hover:bg-line-soft hover:text-ink";
+
+/** A password box with an eye button that shows or hides what was typed, and a Caps Lock warning. */
 function PasswordInput({
   inputClassName,
   toggleClassName,
@@ -60,6 +68,7 @@ function PasswordInput({
   ...props
 }: Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "className"> & {
   inputClassName: string;
+  /** Where the eye button sits in the box. */
   toggleClassName: string;
   noteClassName: string;
 }) {
@@ -79,14 +88,16 @@ function PasswordInput({
           onKeyUp={readCapsLock}
           onBlur={() => setCapsLock(false)}
         />
+        {/* An open eye offers to show it. The crossed-out eye, shown while it is readable, hides it again. */}
         <button
           type="button"
-          className={toggleClassName}
+          className={`${eyeButton} ${toggleClassName}`}
           aria-label={visible ? "Hide password" : "Show password"}
+          title={visible ? "Hide password" : "Show password"}
           aria-pressed={visible}
           onClick={() => setVisible((shown) => !shown)}
         >
-          {visible ? "Hide" : "Show"}
+          <Icon name={visible ? "eyeOff" : "eye"} />
         </button>
       </span>
       {capsLock ? (
@@ -113,6 +124,12 @@ export function StaffSignInForm() {
   const [password, setPassword] = useState("");
   const emailId = useId();
   const passwordId = useId();
+  const toast = useToast();
+
+  // The reason is shown under the boxes and stays there. The toast only says it didn't go through.
+  useEffect(() => {
+    if (state.error) toast.error("Couldn't sign in");
+  }, [state, toast]);
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -143,8 +160,8 @@ export function StaffSignInForm() {
           required
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          inputClassName={`${signInInput} pr-[68px]`}
-          toggleClassName="absolute right-2 top-1/2 -translate-y-1/2 rounded-[8px] px-2.5 py-1.5 text-[13.5px] font-semibold text-muted hover:text-ink"
+          inputClassName={`${signInInput} pr-[52px]`}
+          toggleClassName="right-1.5"
           noteClassName="mt-1.5 block text-[13.5px] text-muted"
         />
       </div>
@@ -161,7 +178,7 @@ export function StaffSignInForm() {
         disabled={pending}
         className="staff-entry-press mt-1 w-full rounded-[12px] bg-brand px-5 py-3.5 text-[16px] font-semibold text-white hover:bg-brand-press disabled:opacity-70"
       >
-        {pending ? "Signing in" : "Sign in"}
+        {pending ? <Busy>Signing in</Busy> : "Sign in"}
       </button>
     </form>
   );
@@ -185,8 +202,12 @@ type GuidedStep = {
   title: string;
   help: string;
   fields: GuidedField[];
+  /** Runs first, in the browser: what is wrong with what was typed, or null. */
+  validate?: (values: Values) => string | null;
   /** Runs when the person continues. Returns what is wrong, or null. It may ask the server. */
   check: (values: Values) => string | null | Promise<string | null>;
+  /** On the step that saves something: what the toast says if the server refuses it. */
+  failed?: string;
   /** The new password and its repeat, to tick the password rules against as they are typed. */
   rules?: [string, string];
   cta: string;
@@ -243,6 +264,7 @@ function GuidedFlow({ steps, exit }: { steps: GuidedStep[]; exit?: ReactNode }) 
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
 
   const current = steps[step];
   const single = current.fields.length === 1;
@@ -255,6 +277,8 @@ function GuidedFlow({ steps, exit }: { steps: GuidedStep[]; exit?: ReactNode }) 
   function submit(event: FormEvent) {
     event.preventDefault();
     if (pending) return;
+    const invalid = current.validate?.(values) ?? null;
+    if (invalid) return setError(invalid);
     setError(null);
     startTransition(async () => {
       let problem: string | null;
@@ -265,8 +289,11 @@ function GuidedFlow({ steps, exit }: { steps: GuidedStep[]; exit?: ReactNode }) 
         unstable_rethrow(thrown);
         problem = CONNECTION_ERROR;
       }
-      if (problem) setError(problem);
-      else if (step < steps.length - 1) goTo(step + 1);
+      if (problem) {
+        setError(problem);
+        // The reason is under the question. The toast only says nothing was saved.
+        if (current.failed) toast.error(current.failed);
+      } else if (step < steps.length - 1) goTo(step + 1);
     });
   }
 
@@ -320,8 +347,8 @@ function GuidedFlow({ steps, exit }: { steps: GuidedStep[]; exit?: ReactNode }) 
                 {spec.kind === "secret" ? (
                   <PasswordInput
                     {...shared}
-                    inputClassName={`${guidedInput} pr-16`}
-                    toggleClassName="absolute right-0 top-1/2 -translate-y-1/2 rounded-[8px] px-2 py-1.5 text-[14px] font-semibold text-muted hover:text-ink"
+                    inputClassName={`${guidedInput} pr-12`}
+                    toggleClassName="right-0"
                     noteClassName="mt-2 block text-[14px] text-muted"
                   />
                 ) : (
@@ -364,7 +391,7 @@ function GuidedFlow({ steps, exit }: { steps: GuidedStep[]; exit?: ReactNode }) 
             disabled={pending}
             className="staff-entry-press rounded-[12px] bg-brand px-7 py-3.5 text-[16px] font-semibold text-white hover:bg-brand-press disabled:opacity-70"
           >
-            {pending ? current.pendingCta : current.cta}
+            {pending ? <Busy>{current.pendingCta}</Busy> : current.cta}
           </button>
           <span className="text-[14px] text-muted max-sm:hidden">
             or press <kbd className="font-mono text-[13px]">Enter ↵</kbd>
@@ -408,8 +435,8 @@ const SETUP_STEPS: GuidedStep[] = [
       { name: "password", label: "Password", kind: "secret", autoComplete: "new-password" },
       { name: "confirm", label: "Password again", kind: "secret", autoComplete: "new-password" },
     ],
+    validate: (v) => newPasswordProblem(v.password, v.confirm),
     check: async (v) =>
-      newPasswordProblem(v.password, v.confirm) ??
       (
         await setUpFirstAdmin(
           initialState,
@@ -422,6 +449,7 @@ const SETUP_STEPS: GuidedStep[] = [
           }),
         )
       ).error,
+    failed: "Admin account not created",
     rules: ["password", "confirm"],
     cta: "Create admin",
     pendingCta: "Creating admin",
@@ -467,16 +495,17 @@ function passwordSteps(temporary: boolean): GuidedStep[] {
         { name: "next", label: "New password", kind: "secret", autoComplete: "new-password" },
         { name: "confirm", label: "New password again", kind: "secret", autoComplete: "new-password" },
       ],
-      check: async (v) =>
+      validate: (v) =>
         newPasswordProblem(v.next, v.confirm) ??
-        (v.next === v.current
-          ? "Choose a password you haven't been using."
-          : (
-              await changePassword(
-                initialState,
-                formDataOf({ currentPassword: v.current, newPassword: v.next, confirmPassword: v.confirm }),
-              )
-            ).error),
+        (v.next === v.current ? "Choose a password you haven't been using." : null),
+      check: async (v) =>
+        (
+          await changePassword(
+            initialState,
+            formDataOf({ currentPassword: v.current, newPassword: v.next, confirmPassword: v.confirm }),
+          )
+        ).error,
+      failed: "Password not saved",
       rules: ["next", "confirm"],
       cta: "Save password",
       pendingCta: "Saving password",

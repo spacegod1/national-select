@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { lookupBill, payBill, type BillLookupState, type PayBillState } from "@/app/billing/actions";
+import { Busy } from "@/components/spinner";
 
 const field =
   "rounded-[11px] border-[1.5px] border-field bg-mist px-3.5 py-[13px] text-[16px] font-normal";
@@ -54,7 +55,7 @@ function LookupCard({ phone, phoneHref, onReset }: Props & { onReset: () => void
             <input type="text" name="dateOfBirth" placeholder="MM / DD / YYYY" autoComplete="bday" required className={field} />
           </label>
           <button type="submit" disabled={looking} className={primary}>
-            {looking ? "Finding your balance" : "Find my balance"}
+            {looking ? <Busy>Finding your balance</Busy> : "Find my balance"}
           </button>
         </form>
       )}
@@ -74,7 +75,7 @@ function LookupCard({ phone, phoneHref, onReset }: Props & { onReset: () => void
               <input type="hidden" name="accountNumber" value={due.accountNumber} />
               <input type="hidden" name="dateOfBirth" value={due.dateOfBirth} />
               <button type="submit" disabled={paying} className={primary}>
-                {paying ? "Opening secure payment" : `Pay ${formatDollars(due.balanceCents)}`}
+                {paying ? <Busy>Opening secure payment</Busy> : `Pay ${formatDollars(due.balanceCents)}`}
               </button>
               {payState.error ? (
                 <p role="alert" className="text-[15px] leading-[1.55] text-brand-dark">

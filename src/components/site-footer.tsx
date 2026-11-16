@@ -24,7 +24,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-[clamp(28px,4vw,48px)] px-[clamp(16px,4vw,40px)] pb-7 pt-[clamp(44px,6vw,72px)]">
         <div className="col-span-1 min-w-[240px]">
           <Image
-            src="/logo-light.png"
+            src="/logo-on-dark.png"
             alt={CLINIC.name}
             width={101}
             height={44}

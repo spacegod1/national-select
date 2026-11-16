@@ -10,6 +10,8 @@ import {
   type IssuedPassword,
   type IssuedPasswordState,
 } from "@/app/staff/actions";
+import { Busy, Spinner } from "@/components/spinner";
+import { useToast } from "@/components/staff-toast";
 import { Avatar, Chip, Icon, skin } from "@/components/staff-ui";
 import { CONNECTION_ERROR, formDataOf } from "@/lib/staff/forms";
 
@@ -44,7 +46,18 @@ type MenuItem = {
 };
 
 /** One button per row that opens that person's actions, instead of a row of links. */
-function ManageMenu({ name, items, disabled }: { name: string; items: MenuItem[]; disabled: boolean }) {
+function ManageMenu({
+  name,
+  items,
+  disabled,
+  busy,
+}: {
+  name: string;
+  items: MenuItem[];
+  disabled: boolean;
+  /** One of this person's actions is running. */
+  busy: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -81,10 +94,14 @@ function ManageMenu({ name, items, disabled }: { name: string; items: MenuItem[]
         }`}
       >
         Manage
-        <Icon
-          name="down"
-          className={`h-4 w-4 text-muted transition-transform duration-150 ease-out ${open ? "rotate-180" : ""}`}
-        />
+        {busy ? (
+          <Spinner className="h-4 w-4 text-muted" />
+        ) : (
+          <Icon
+            name="down"
+            className={`h-4 w-4 text-muted transition-transform duration-150 ease-out ${open ? "rotate-180" : ""}`}
+          />
+        )}
       </button>
       {open ? (
         <ul className="staff-entry-fade absolute right-0 top-[calc(100%+6px)] z-20 w-[196px] rounded-[12px] border border-line bg-white p-1.5 text-left shadow-[0_18px_40px_-18px_rgba(27,42,74,.5)]">
@@ -121,28 +138,44 @@ export function StaffUsers({ users, currentUserId }: { users: StaffUserRow[] | n
   /** The row being changed, or "new" while a user is being added. */
   const [busy, setBusy] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
 
   // A new password or a refusal appears above the list, which may be off screen.
   useEffect(() => {
     if (issued || error) noticeRef.current?.scrollIntoView({ block: "nearest" });
   }, [issued, error]);
 
-  function run(target: string, work: () => Promise<IssuedPasswordState | void>, onDone?: () => void) {
+  /**
+   * Runs one change and says how it went in a toast. The Add form also shows a
+   * refusal under its boxes. A row's menu has nowhere to, so its toast carries the reason.
+   */
+  function run(
+    target: string,
+    work: () => Promise<{ error: string | null; issued?: IssuedPassword | null }>,
+    words: { done: string; detail?: string; failed: string },
+    onDone?: () => void,
+  ) {
     if (pending) return;
+    const fromForm = target === "new";
     setError(null);
     setBusy(target);
     startTransition(async () => {
+      let problem: string | null;
       try {
         const result = await work();
-        if (result?.error) setError(result.error);
-        else {
-          if (result?.issued) setIssued(result.issued);
-          onDone?.();
-        }
+        problem = result.error;
+        if (!problem && result.issued) setIssued(result.issued);
       } catch (thrown) {
         // Being signed out arrives here as a redirect, which Next has to see.
         unstable_rethrow(thrown);
-        setError(CONNECTION_ERROR);
+        problem = CONNECTION_ERROR;
+      }
+      if (problem) {
+        if (fromForm) setError(problem);
+        toast.error(words.failed, fromForm ? undefined : problem);
+      } else {
+        toast.success(words.done, words.detail);
+        onDone?.();
       }
       setBusy(null);
     });
@@ -155,6 +188,11 @@ export function StaffUsers({ users, currentUserId }: { users: StaffUserRow[] | n
     run(
       "new",
       () => addStaffUser(initialIssuedState, formDataOf({ name, email, role })),
+      {
+        done: `${name.trim()} added`,
+        detail: "Their temporary password is above the list. Copy it now.",
+        failed: "User not added",
+      },
       () => {
         setName("");
         setEmail("");
@@ -202,7 +240,7 @@ export function StaffUsers({ users, currentUserId }: { users: StaffUserRow[] | n
             </select>
           </label>
           <button type="submit" disabled={pending} className={skin.primary}>
-            {busy === "new" ? "Adding" : "Add user"}
+            {busy === "new" ? <Busy>Adding</Busy> : "Add user"}
           </button>
         </div>
         <div ref={noticeRef} className="scroll-mt-20">
@@ -246,7 +284,7 @@ export function StaffUsers({ users, currentUserId }: { users: StaffUserRow[] | n
             <span />
           </li>
           {users.map((user) => {
-            const status = STATUS[user.status];
+            const status = STATUS[user.status];
             return (
               <li
                 key={user.id}
@@ -290,17 +328,30 @@ export function StaffUsers({ users, currentUserId }: { users: StaffUserRow[] | n
                   <ManageMenu
                     name={user.name}
                     disabled={pending}
+                    busy={busy === user.id}
                     items={[
                       {
                         label: "Reset password",
                         onSelect: () =>
-                          run(user.id, () => resetPassword(initialIssuedState, formDataOf({ userId: user.id }))),
+                          run(user.id, () => resetPassword(initialIssuedState, formDataOf({ userId: user.id })), {
+                            done: `Password reset for ${user.name}`,
+                            detail: "Their temporary password is above the list. Copy it now.",
+                            failed: "Password not reset",
+                          }),
                       },
                       {
                         label: user.role === "admin" ? "Make staff" : "Make admin",
                         onSelect: () =>
-                          run(user.id, () =>
-                            setUserRole(formDataOf({ userId: user.id, role: user.role === "admin" ? "staff" : "admin" })),
+                          run(
+                            user.id,
+                            () =>
+                              setUserRole(
+                                formDataOf({ userId: user.id, role: user.role === "admin" ? "staff" : "admin" }),
+                              ),
+                            {
+                              done: `${user.name} is now ${user.role === "admin" ? "staff" : "an admin"}`,
+                              failed: "Role not changed",
+                            },
                           ),
                       },
                       user.status === "deactivated"
@@ -308,14 +359,22 @@ export function StaffUsers({ users, currentUserId }: { users: StaffUserRow[] | n
                             label: "Reactivate",
                             apart: true,
                             onSelect: () =>
-                              run(user.id, () => setUserActive(formDataOf({ userId: user.id, active: "true" }))),
+                              run(user.id, () => setUserActive(formDataOf({ userId: user.id, active: "true" })), {
+                                done: `${user.name} reactivated`,
+                                detail: "They can sign in again.",
+                                failed: `${user.name} not reactivated`,
+                              }),
                           }
                         : {
                             label: "Deactivate",
                             apart: true,
                             danger: true,
                             onSelect: () =>
-                              run(user.id, () => setUserActive(formDataOf({ userId: user.id, active: "false" }))),
+                              run(user.id, () => setUserActive(formDataOf({ userId: user.id, active: "false" })), {
+                                done: `${user.name} deactivated`,
+                                detail: "They've been signed out and can't sign in.",
+                                failed: `${user.name} not deactivated`,
+                              }),
                           },
                     ]}
                   />
