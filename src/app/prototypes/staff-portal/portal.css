@@ -1,0 +1,103 @@
+/* Staff portal prototype. Motion is transform/opacity only; the site's
+   reduced-motion rule shortens all of it to nothing. */
+
+/* Each design fills the window and covers the public header and footer,
+   because the real staff area doesn't show them. */
+.portal-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  background: var(--color-mist);
+  color: var(--color-ink);
+}
+
+/* On a phone or tablet the picker gets its own strip under the design, so it
+   never sits on top of a design's bottom navigation. */
+.portal-strip {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .portal-stage {
+    bottom: 76px;
+  }
+  .portal-strip {
+    display: block;
+    position: fixed;
+    inset: auto 0 0 0;
+    height: 76px;
+    z-index: 1000;
+    background: #16181d;
+  }
+}
+
+/* Inside the phone preview there is no picker to make room for, and a phone
+   has no visible scrollbar. */
+.portal-stage[data-frame] {
+  bottom: 0;
+}
+html:has(.portal-stage[data-frame]) {
+  overflow: hidden;
+}
+.portal-stage[data-frame] * {
+  scrollbar-width: none;
+}
+.portal-stage[data-frame] *::-webkit-scrollbar {
+  display: none;
+}
+
+/* A faint field of plus signs, the cross from the logo, fading out to the
+   left. Decoration only: put it on an empty, absolutely positioned element. */
+.portal-pluses {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9.5v7M9.5 13h7' stroke='%231b2a4a' stroke-opacity='.13' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(to left, #000 0%, transparent 92%);
+  mask-image: linear-gradient(to left, #000 0%, transparent 92%);
+}
+
+@keyframes portal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes portal-slide {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes portal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.portal-rise {
+  animation: portal-rise 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.portal-slide {
+  animation: portal-slide 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.portal-fade {
+  animation: portal-fade 160ms ease-out both;
+}
+
+.portal-press {
+  transition:
+    background-color 150ms ease-out,
+    transform 100ms ease-out;
+}
+.portal-press:active:not(:disabled) {
+  transform: scale(0.97);
+}

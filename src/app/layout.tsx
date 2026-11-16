@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { BookingProvider } from "@/components/booking-modal";
+import { PublicChrome } from "@/components/public-chrome";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
@@ -42,9 +43,13 @@ export default function RootLayout({
       <body>
         <BookingProvider>
           <div className="flex min-h-screen flex-col">
-            <SiteHeader />
+            <PublicChrome>
+              <SiteHeader />
+            </PublicChrome>
             <div className="flex-1">{children}</div>
-            <SiteFooter />
+            <PublicChrome>
+              <SiteFooter />
+            </PublicChrome>
           </div>
         </BookingProvider>
       </body>
