@@ -227,6 +227,7 @@ export function VoidCharge({
   className: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const title = useRef<HTMLHeadingElement>(null);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -241,6 +242,8 @@ export function VoidCharge({
     setNote("");
     setError(null);
     dialog.current?.showModal();
+    // Start on the title. Left alone, the browser picks the scrolling area and draws a ring on it.
+    title.current?.focus();
   }
 
   function close() {
@@ -285,28 +288,37 @@ export function VoidCharge({
         onClick={(event) => {
           if (event.target === event.currentTarget) close();
         }}
-        className="staff-dialog m-auto w-[min(460px,calc(100%-32px))] overflow-hidden rounded-[18px] bg-white text-left font-sans text-[15px] font-normal normal-case leading-[1.5] tracking-normal text-ink shadow-[0_30px_70px_-30px_rgba(27,42,74,.7)] max-md:mb-0 max-md:w-full max-md:max-w-none max-md:rounded-b-none"
+        className="staff-dialog m-auto w-[min(600px,calc(100%-32px))] overflow-hidden rounded-[18px] bg-white text-left font-sans text-[15px] font-normal normal-case leading-[1.5] tracking-normal text-ink shadow-[0_30px_70px_-30px_rgba(27,42,74,.7)] max-md:mb-0 max-md:w-full max-md:max-w-none max-md:rounded-b-none"
       >
-        <form onSubmit={submit} noValidate className="flex max-h-[min(88dvh,680px)] flex-col">
-          <div className="min-h-0 overflow-y-auto px-5 pb-4 pt-5 md:px-6 md:pt-6">
-            <h2 id={titleId} className="font-display text-[22px] font-extrabold leading-[1.15] tracking-[-.025em]">
+        {/* As tall as its contents, up to the height of the window. Only a window too short for it scrolls. */}
+        <form onSubmit={submit} noValidate className="flex max-h-[calc(100dvh-48px)] flex-col">
+          {/* If it does scroll, the bar is thin and pale. With the keyboard on it, the bar turns red
+              in place of the usual ring, which the pop-up's edges would cut down to a stray line. */}
+          <div className="min-h-0 overflow-y-auto overscroll-contain px-5 pb-4 pt-5 [scrollbar-color:var(--color-line)_transparent] [scrollbar-width:thin] focus-visible:outline-none focus-visible:[scrollbar-color:var(--color-brand)_transparent] md:px-6 md:pt-6">
+            <h2
+              ref={title}
+              id={titleId}
+              tabIndex={-1}
+              className="font-display text-[22px] font-extrabold leading-[1.15] tracking-[-.025em] outline-none"
+            >
               Void this charge?
             </h2>
             <div className="mt-3 flex items-baseline justify-between gap-4 rounded-[12px] bg-mist px-3.5 py-3">
               <span className="min-w-0 break-words font-semibold">{description}</span>
               <span className="font-semibold tabular-nums">{amount}</span>
             </div>
-            <p className="mt-3 text-[14px] text-muted">
+            <p className="mt-3 text-pretty text-[14px] text-muted">
               It stays on the account marked Void, and the balance drops by {amount}. A void can&apos;t be undone.
             </p>
 
             <fieldset className="mt-4">
               <legend className="text-[13px] font-semibold text-muted">Why is it being voided?</legend>
-              <div className="mt-2 flex flex-col gap-1.5">
+              {/* Side by side where there is room, so the pop-up stays short. */}
+              <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                 {VOID_REASONS.map((item) => (
                   <label
                     key={item.id}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-[10px] border border-line px-3 py-2 text-[14.5px] transition-colors duration-150 ease-out hover:border-field has-[:checked]:border-ink has-[:checked]:bg-mist"
+                    className="flex min-w-0 cursor-pointer items-center gap-2.5 rounded-[10px] border border-line px-3 py-2 text-[14.5px] transition-colors duration-150 ease-out hover:border-field has-[:checked]:border-ink has-[:checked]:bg-mist"
                   >
                     <input
                       type="radio"
